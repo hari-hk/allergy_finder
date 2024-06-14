@@ -1,5 +1,5 @@
 name: allergy_finder
-description: "A new Flutter project."
+description: "A Project for Infosys Makethon"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -28,13 +28,15 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  camera: ^0.11.0+1
   flutter:
     sdk: flutter
+  path: ^1.9.0
+  path_provider: ^2.1.3
 
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.6
 
 dev_dependencies:
   flutter_test:
