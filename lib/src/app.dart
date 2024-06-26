@@ -5,7 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'settings/settings_controller.dart';
 import 'settings/settings_view.dart';
-import 'screens/home/home.screen.dart';
+import 'screens/home.screen.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({
