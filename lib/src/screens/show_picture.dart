@@ -19,6 +19,7 @@ class ShowPicture extends StatelessWidget {
           IconButton(
               onPressed: () {
                 print('on profile icon click');
+                Navigator.of(context).pushNamed('/profile');
               },
               icon: const Icon(Icons.account_circle, size: 40.0))
         ],
