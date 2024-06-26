@@ -1,3 +1,4 @@
+import 'package:allergy_finder/src/login/login_view.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -46,6 +47,9 @@ class MyApp extends StatelessWidget {
                 switch (routeSettings.name) {
                   case SettingsView.routeName:
                     return SettingsView(controller: settingsController);
+                  case LoginView.routeName:
+                    return const LoginView();
+                  case Home.routeName:
                   default:
                     return Home(cameras: camera);
                 }

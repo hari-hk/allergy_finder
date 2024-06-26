@@ -51,7 +51,7 @@ class _HomeState extends State<Home> {
         actions: [
           IconButton(
               onPressed: () {
-                print('on profile icon click');
+                Navigator.of(context).pushNamed('/login');
               },
               icon: const Icon(Icons.account_circle, size: 40.0))
         ],
