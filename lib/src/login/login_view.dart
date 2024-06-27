@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -21,13 +24,25 @@ class _LoginViewState extends State<LoginView> {
     super.dispose();
   }
 
-  void _submit() {
+  void _submit() async {
     if (_formKey.currentState!.validate()) {
-      // Perform login action
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Logging in...')));
-
-      Navigator.of(context).pushNamed('/');
+      const url = 'https://dummyjson.com/auth/login';
+      final response = await http.post(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'username': 'emilys', // _emailController.text
+          'password': 'emilyspass', // _passwordController.text
+        }),
+      );
+      if (response.statusCode == 200) {
+        Navigator.of(context).pushNamed('/');
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Failed login..')));
+      }
     }
   }
 
