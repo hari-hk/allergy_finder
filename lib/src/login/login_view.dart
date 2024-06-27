@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -26,20 +27,34 @@ class _LoginViewState extends State<LoginView> {
 
   void _submit() async {
     if (_formKey.currentState!.validate()) {
-      const url = 'https://dummyjson.com/auth/login';
-      final response = await http.post(
-        Uri.parse(url),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, String>{
-          'username': 'emilys', // _emailController.text
-          'password': 'emilyspass', // _passwordController.text
-        }),
-      );
-      if (response.statusCode == 200) {
-        Navigator.of(context).pushNamed('/');
-      } else {
+      const url =
+          'https://tioadxz0c9.execute-api.us-east-1.amazonaws.com/dev/signin';
+      try {
+        final response = await http.post(
+          Uri.parse(url),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(<String, String>{
+            'email': _emailController.text,
+            'password': _passwordController.text,
+          }),
+        );
+        if (response.statusCode == 200) {
+          final Map<String, dynamic> responseData = jsonDecode(response.body);
+          final Map<String, dynamic> responseDataBody =
+              jsonDecode(responseData['body']);
+          final String token = responseDataBody['user_id'];
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('userId', token);
+
+          Navigator.of(context).pushNamed('/');
+        } else {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(const SnackBar(content: Text('Failed login..')));
+        }
+      } catch (e) {
+        print(e);
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text('Failed login..')));
       }
@@ -112,7 +127,8 @@ class _LoginViewState extends State<LoginView> {
                   const SizedBox(
                     height: 16.0,
                   ),
-                  Center(
+                  SizedBox(
+                    width: double.infinity,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
