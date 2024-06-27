@@ -47,6 +47,13 @@ class _ProfileViewState extends State<ProfileView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
+        actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.of(context).pushNamed('/settings');
+              },
+              icon: const Icon(Icons.color_lens, size: 30.0))
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -111,27 +118,43 @@ class _ProfileViewState extends State<ProfileView> {
                   },
                 ),
                 const SizedBox(height: 16.0),
-                const Text('Allergy Items', style: TextStyle(fontSize: 16)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Text('Allergy Items', style: TextStyle(fontSize: 24)),
+                    IconButton(
+                        style: IconButton.styleFrom(),
+                        onPressed: _addAllergyItem,
+                        icon: const Icon(
+                          Icons.add,
+                          size: 24,
+                        ))
+                  ],
+                ),
                 ..._allergyItems.map((allergyItem) {
                   int index = _allergyItems.indexOf(allergyItem);
                   return Row(
                     children: [
                       Expanded(
-                        child: TextFormField(
-                          initialValue: allergyItem,
-                          decoration: const InputDecoration(
-                            labelText: 'Allergy Item',
-                            border: OutlineInputBorder(),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: TextFormField(
+                            initialValue: allergyItem,
+                            decoration: const InputDecoration(
+                              labelText: 'Allergy Item',
+                              border: OutlineInputBorder(),
+                            ),
+                            onChanged: (value) {
+                              _allergyItems[index] = value;
+                            },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter an allergy item';
+                              }
+                              return null;
+                            },
                           ),
-                          onChanged: (value) {
-                            _allergyItems[index] = value;
-                          },
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter an allergy item';
-                            }
-                            return null;
-                          },
                         ),
                       ),
                       IconButton(
@@ -143,15 +166,13 @@ class _ProfileViewState extends State<ProfileView> {
                     ],
                   );
                 }).toList(),
-                TextButton(
-                  onPressed: _addAllergyItem,
-                  child: const Text('Add Allergy Item'),
-                ),
                 const SizedBox(height: 16.0),
-                Center(
+                SizedBox(
+                  width: double.infinity,
                   child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(),
                     onPressed: _submit,
-                    child: const Text('Submit'),
+                    child: const Text('UPDATE'),
                   ),
                 ),
               ],
