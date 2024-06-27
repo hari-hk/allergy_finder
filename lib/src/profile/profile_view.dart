@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileView extends StatefulWidget {
   static const routeName = '/profile';
@@ -9,11 +10,22 @@ class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> {
+  static const url =
+      'https://tioadxz0c9.execute-api.us-east-1.amazonaws.com/dev/profile';
+
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
   String _gender = 'Male';
   List<String> _allergyItems = [];
+
+  get http => null;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
 
   @override
   void dispose() {
@@ -39,6 +51,24 @@ class _ProfileViewState extends State<ProfileView> {
       // Perform save action
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Profile saved')));
+    }
+  }
+
+  void fetchData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? userId = await prefs.getString('userId');
+    final response = await http.get(
+      Uri.parse(url),
+      headers: <String, String?>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'user-id': userId
+      },
+    );
+
+    if (response.statusCode == 200) {
+      print('Response body: ${response.body}');
+    } else {
+      print('Request failed with status: ${response.statusCode}.');
     }
   }
 
