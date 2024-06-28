@@ -86,7 +86,7 @@ class _ProfileViewState extends State<ProfileView> {
               onPressed: () {
                 Navigator.of(context).pushNamed('/settings');
               },
-              icon: const Icon(Icons.color_lens, size: 30.0))
+              icon: const Icon(Icons.settings, size: 30.0))
         ],
       ),
       body: FutureBuilder(

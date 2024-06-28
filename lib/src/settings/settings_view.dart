@@ -1,4 +1,4 @@
-import 'package:allergy_finder/src/common/common_service.dart';
+import 'package:allergy_finder/src/common/auth_service.dart';
 import 'package:flutter/material.dart';
 
 import 'settings_controller.dart';
@@ -54,9 +54,9 @@ class SettingsView extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  logout();
-                  Navigator.of(context).pushNamed('/');
+                onPressed: () async {
+                  await AuthService.logout();
+                  Navigator.of(context).pushNamed('/login');
                 },
                 child: const Text('Logout'),
               ),

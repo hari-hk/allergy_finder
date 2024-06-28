@@ -1,8 +1,8 @@
 import 'dart:convert';
 
+import 'package:allergy_finder/src/common/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -18,6 +18,7 @@ class _LoginViewState extends State<LoginView> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool isLoading = false;
+  bool _obscureText = true;
 
   @override
   void dispose() {
@@ -50,12 +51,9 @@ class _LoginViewState extends State<LoginView> {
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         final String userID = responseData['user_id'];
-        print(userID);
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('userId', userID.toString());
+        await AuthService.login(userID.toString());
         handleLoading(false);
-
-        Navigator.of(context).pushNamed('/');
+        Navigator.pushReplacementNamed(context, '/');
       } else {
         handleLoading(false);
         ScaffoldMessenger.of(context)
@@ -97,6 +95,15 @@ class _LoginViewState extends State<LoginView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Expanded(
+                    child: Center(
+                      child: Icon(
+                        Icons.ac_unit_sharp,
+                        size: 120,
+                        color: Colors.teal[500],
+                      ),
+                    ),
+                  ),
                   const SizedBox(
                     height: 26.0,
                   ),
@@ -121,17 +128,30 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   TextFormField(
                     controller: _passwordController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Password',
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureText
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: Theme.of(context).primaryColorDark,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscureText = !_obscureText;
+                          });
+                        },
+                      ),
                     ),
-                    obscureText: true,
+                    obscureText: _obscureText,
                     validator: _validatePassword,
                   ),
                   const SizedBox(
                     height: 16.0,
                   ),
                   isLoading
-                      ? const CircularProgressIndicator()
+                      ? const Center(child: CircularProgressIndicator())
                       : SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
