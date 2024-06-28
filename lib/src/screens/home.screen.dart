@@ -1,5 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'show_picture.dart';
 
 class Home extends StatefulWidget {
@@ -19,6 +20,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -77,7 +79,17 @@ class _HomeState extends State<Home> {
                             borderRadius: BorderRadius.circular(5),
                           ),
                         ),
-                        onPressed: () {},
+                        onPressed: () async {
+                          final pickedFile = await _picker.pickImage(
+                              source: ImageSource.gallery);
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => ShowPicture(
+                                imagePath: pickedFile!.path,
+                              ),
+                            ),
+                          );
+                        },
                         icon: const Icon(Icons.image)),
                   ),
                   Positioned(
