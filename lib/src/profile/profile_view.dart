@@ -31,11 +31,7 @@ class _ProfileViewState extends State<ProfileView> {
     profileData.then((user) {
       _nameController.text = user.userName;
       _emailController.text = user.email;
-      try {
-        _allergyItems.addAll(user.allergyList);
-      } catch (e) {
-        print(e);
-      }
+      _allergyItems.addAll(user.allergyList);
     });
   }
 
