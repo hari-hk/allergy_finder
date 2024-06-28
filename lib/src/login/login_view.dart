@@ -29,32 +29,25 @@ class _LoginViewState extends State<LoginView> {
     if (_formKey.currentState!.validate()) {
       const url =
           'https://tioadxz0c9.execute-api.us-east-1.amazonaws.com/dev/signin';
-      try {
-        final response = await http.post(
-          Uri.parse(url),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
-          body: jsonEncode(<String, String>{
-            'email': _emailController.text,
-            'password': _passwordController.text,
-          }),
-        );
-        if (response.statusCode == 200) {
-          final Map<String, dynamic> responseData = jsonDecode(response.body);
-          final Map<String, dynamic> responseDataBody =
-              jsonDecode(responseData['body']);
-          final String token = responseDataBody['user_id'];
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('userId', token);
+      final response = await http.post(
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'email': _emailController.text,
+          'password': _passwordController.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        final String userID = responseData['user_id'];
+        print(userID);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('userId', userID.toString());
 
-          Navigator.of(context).pushNamed('/');
-        } else {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(const SnackBar(content: Text('Failed login..')));
-        }
-      } catch (e) {
-        print(e);
+        Navigator.of(context).pushNamed('/');
+      } else {
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text('Failed login..')));
       }
