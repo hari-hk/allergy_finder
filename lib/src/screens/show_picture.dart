@@ -4,17 +4,25 @@ import 'dart:io';
 import 'package:allergy_finder/src/screens/show_picture_service.dart';
 import 'package:flutter/material.dart';
 
-class ShowPicture extends StatelessWidget {
+class ShowPictureView extends StatefulWidget {
+  const ShowPictureView({super.key, required this.imagePath});
   final String imagePath;
 
-  const ShowPicture({super.key, required this.imagePath});
+  @override
+  State<ShowPictureView> createState() => _ShowPictureViewState();
+}
+
+class _ShowPictureViewState extends State<ShowPictureView> {
+  final bool isLoading = false;
 
   void uploadPicture() async {
-    final _image = File(imagePath);
+    final _image = File(widget.imagePath);
     List<int> imageBytes = _image.readAsBytesSync();
     String base64Image = base64Encode(imageBytes);
-    uploadImage(base64Image);
+    await uploadImage(base64Image);
   }
+
+  void handleLoading() {}
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +45,7 @@ class ShowPicture extends StatelessWidget {
         alignment: Alignment.center,
         children: [
           Image.file(
-            File(imagePath),
+            File(widget.imagePath),
             fit: BoxFit.cover,
             height: MediaQuery.of(context).size.height,
           ),
@@ -52,8 +60,8 @@ class ShowPicture extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {
-                  // allergyListBottomSheet(context);
-                  uploadPicture();
+                  allergyListBottomSheet(context);
+                  // uploadPicture();
                 },
                 child: const Row(
                   children: [

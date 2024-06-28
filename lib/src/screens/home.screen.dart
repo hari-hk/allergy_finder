@@ -84,7 +84,7 @@ class _HomeState extends State<Home> {
                               source: ImageSource.gallery);
                           await Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => ShowPicture(
+                              builder: (context) => ShowPictureView(
                                 imagePath: pickedFile!.path,
                               ),
                             ),
@@ -105,7 +105,7 @@ class _HomeState extends State<Home> {
                           final image = await _controller.takePicture();
                           await Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => ShowPicture(
+                              builder: (context) => ShowPictureView(
                                 imagePath: image.path,
                               ),
                             ),
