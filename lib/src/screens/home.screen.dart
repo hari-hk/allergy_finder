@@ -59,10 +59,49 @@ class _HomeState extends State<Home> {
           if (snapshot.connectionState == ConnectionState.done) {
             return FittedBox(
               fit: BoxFit.fitWidth,
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
-                child: CameraPreview(_controller),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
+                    child: CameraPreview(_controller),
+                  ),
+                  Positioned(
+                    bottom: 20,
+                    left: 20,
+                    child: IconButton.outlined(
+                        style: IconButton.styleFrom(
+                          iconSize: 50,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                        ),
+                        onPressed: () {},
+                        icon: const Icon(Icons.image)),
+                  ),
+                  Positioned(
+                    bottom: 20,
+                    child: IconButton.outlined(
+                        style: IconButton.styleFrom(
+                          iconSize: 50,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                        ),
+                        onPressed: () async {
+                          final image = await _controller.takePicture();
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => ShowPicture(
+                                imagePath: image.path,
+                              ),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.camera)),
+                  )
+                ],
               ),
             );
           } else {
@@ -72,32 +111,6 @@ class _HomeState extends State<Home> {
           }
         },
       ),
-      floatingActionButton: FloatingActionButton.large(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        onPressed: () async {
-          try {
-            final image = await _controller.takePicture();
-            await Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => ShowPicture(
-                  // Pass the automatically generated path to
-                  // the DisplayPictureScreen widget.
-                  imagePath: image.path,
-                ),
-              ),
-            );
-          } catch (e) {
-            print(' issue in taking picture 111');
-          }
-        },
-        child: const Icon(
-          Icons.camera,
-          size: 60,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
