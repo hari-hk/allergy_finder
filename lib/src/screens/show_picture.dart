@@ -13,16 +13,22 @@ class ShowPictureView extends StatefulWidget {
 }
 
 class _ShowPictureViewState extends State<ShowPictureView> {
-  final bool isLoading = false;
+  bool isLoading = false;
 
   void uploadPicture() async {
+    handleLoading(true);
     final _image = File(widget.imagePath);
     List<int> imageBytes = _image.readAsBytesSync();
     String base64Image = base64Encode(imageBytes);
     await uploadImage(base64Image);
+    handleLoading(false);
   }
 
-  void handleLoading() {}
+  void handleLoading(bool loading) {
+    setState(() {
+      isLoading = loading;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,35 +57,37 @@ class _ShowPictureViewState extends State<ShowPictureView> {
           ),
           Positioned(
               bottom: 10,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(150, 80),
-                  backgroundColor: const Color.fromRGBO(0, 0, 0, .3),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5.0),
-                  ),
-                ),
-                onPressed: () {
-                  allergyListBottomSheet(context);
-                  // uploadPicture();
-                },
-                child: const Row(
-                  children: [
-                    Icon(
-                      Icons.document_scanner_outlined,
-                      size: 30,
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Text(
-                      'SCAN',
-                      style:
-                          TextStyle(fontSize: 30, fontWeight: FontWeight.w500),
-                    )
-                  ],
-                ),
-              ))
+              child: isLoading
+                  ? const CircularProgressIndicator()
+                  : ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(150, 80),
+                        backgroundColor: const Color.fromRGBO(0, 0, 0, .3),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
+                      ),
+                      onPressed: () {
+                        // allergyListBottomSheet(context);
+                        uploadPicture();
+                      },
+                      child: const Row(
+                        children: [
+                          Icon(
+                            Icons.document_scanner_outlined,
+                            size: 30,
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            'SCAN',
+                            style: TextStyle(
+                                fontSize: 30, fontWeight: FontWeight.w500),
+                          )
+                        ],
+                      ),
+                    ))
         ],
       ),
     );
