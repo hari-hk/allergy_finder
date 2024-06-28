@@ -1,3 +1,4 @@
+import 'package:allergy_finder/src/common/common_service.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
@@ -10,5 +11,8 @@ void main() async {
   final settingsController = SettingsController(SettingsService());
   final camera = await availableCameras();
   await settingsController.loadSettings();
-  runApp(MyApp(settingsController: settingsController, camera: camera));
+
+  final String? token = await getToken();
+  runApp(MyApp(
+      settingsController: settingsController, camera: camera, token: token));
 }

@@ -16,11 +16,11 @@ class ProfileView extends StatefulWidget {
 class _ProfileViewState extends State<ProfileView> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _ageController = TextEditingController();
-  String _gender = 'Male';
+  final TextEditingController _emailController = TextEditingController();
   List<String> _allergyItems = [];
 
   late Future profileData;
+  bool isLoading = false;
 
   get http => null;
 
@@ -28,12 +28,21 @@ class _ProfileViewState extends State<ProfileView> {
   void initState() {
     super.initState();
     profileData = fetchUser();
+    profileData.then((user) {
+      _nameController.text = user.userName;
+      _emailController.text = user.email;
+      try {
+        _allergyItems.addAll(user.allergyList);
+      } catch (e) {
+        print(e);
+      }
+    });
   }
 
   @override
   void dispose() {
     _nameController.dispose();
-    _ageController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
 
@@ -43,17 +52,27 @@ class _ProfileViewState extends State<ProfileView> {
     });
   }
 
-  void _removeAllergyItem(int index) {
+  void _removeAllergyItem(String data) {
     setState(() {
-      _allergyItems.removeAt(index);
+      _allergyItems.removeWhere((item) => item == data);
+    });
+  }
+
+  void handleLoading(bool type) {
+    setState(() {
+      isLoading = type;
     });
   }
 
   void _submit() {
     if (_formKey.currentState!.validate()) {
-      // Perform save action
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Profile saved')));
+      handleLoading(true);
+      updateUser(_emailController.text, _nameController.text, _allergyItems)
+          .then((response) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Profile updated')));
+        handleLoading(false);
+      });
     }
   }
 
@@ -87,7 +106,6 @@ class _ProfileViewState extends State<ProfileView> {
                           decoration: const InputDecoration(
                             labelText: 'Name',
                             hintText: 'Enter your name',
-                            border: OutlineInputBorder(),
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -98,43 +116,12 @@ class _ProfileViewState extends State<ProfileView> {
                         ),
                         const SizedBox(height: 16.0),
                         TextFormField(
-                          controller: _ageController,
+                          controller: _emailController,
                           decoration: const InputDecoration(
-                            labelText: 'Age',
-                            hintText: 'Enter your age',
-                            border: OutlineInputBorder(),
+                            labelText: 'Email',
+                            hintText: 'Enter Email',
                           ),
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your age';
-                            }
-                            final int? age = int.tryParse(value);
-                            if (age == null || age <= 0) {
-                              return 'Please enter a valid age';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16.0),
-                        DropdownButtonFormField<String>(
-                          value: _gender,
-                          decoration: const InputDecoration(
-                            labelText: 'Gender',
-                            border: OutlineInputBorder(),
-                          ),
-                          items: <String>['Male', 'Female', 'Other']
-                              .map((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              _gender = newValue!;
-                            });
-                          },
+                          readOnly: true,
                         ),
                         const SizedBox(height: 16.0),
                         Row(
@@ -164,7 +151,6 @@ class _ProfileViewState extends State<ProfileView> {
                                     initialValue: allergyItem,
                                     decoration: const InputDecoration(
                                       labelText: 'Allergy Item',
-                                      border: OutlineInputBorder(),
                                     ),
                                     onChanged: (value) {
                                       _allergyItems[index] = value;
@@ -181,20 +167,24 @@ class _ProfileViewState extends State<ProfileView> {
                               IconButton(
                                 icon: const Icon(Icons.delete),
                                 onPressed: () {
-                                  _removeAllergyItem(index);
+                                  _removeAllergyItem(_allergyItems[index]);
                                 },
                               ),
                             ],
                           );
                         }).toList(),
                         const SizedBox(height: 16.0),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(),
-                            onPressed: _submit,
-                            child: const Text('UPDATE'),
-                          ),
+                        Center(
+                          child: isLoading
+                              ? const CircularProgressIndicator()
+                              : SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(),
+                                    onPressed: _submit,
+                                    child: const Text('UPDATE'),
+                                  ),
+                                ),
                         ),
                       ],
                     ),
@@ -204,7 +194,7 @@ class _ProfileViewState extends State<ProfileView> {
             } else if (snapshot.hasError) {
               return Text('${snapshot.error}');
             }
-            return const CircularProgressIndicator();
+            return const Center(child: CircularProgressIndicator());
           }),
     );
   }

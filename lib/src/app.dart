@@ -1,3 +1,4 @@
+import 'package:allergy_finder/src/common/common_service.dart';
 import 'package:allergy_finder/src/login/login_view.dart';
 import 'package:allergy_finder/src/profile/profile_view.dart';
 import 'package:camera/camera.dart';
@@ -14,10 +15,12 @@ class MyApp extends StatelessWidget {
     super.key,
     required this.settingsController,
     required this.camera,
+    required this.token,
   });
 
   final SettingsController settingsController;
   final List<CameraDescription> camera;
+  final String? token;
 
   @override
   Widget build(BuildContext context) {
@@ -45,13 +48,17 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute<void>(
               settings: routeSettings,
               builder: (BuildContext context) {
+                if (routeSettings.name != LoginView.routeName &&
+                    (token == '' || token == null)) {
+                  return const LoginView();
+                }
                 switch (routeSettings.name) {
                   case SettingsView.routeName:
                     return SettingsView(controller: settingsController);
                   case LoginView.routeName:
                     return const LoginView();
                   case ProfileView.routeName:
-                    return ProfileView();
+                    return const ProfileView();
                   case Home.routeName:
                   default:
                     return Home(cameras: camera);

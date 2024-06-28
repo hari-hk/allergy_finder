@@ -17,6 +17,7 @@ class _LoginViewState extends State<LoginView> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool isLoading = false;
 
   @override
   void dispose() {
@@ -25,8 +26,15 @@ class _LoginViewState extends State<LoginView> {
     super.dispose();
   }
 
+  void handleLoading(bool type) {
+    setState(() {
+      isLoading = type;
+    });
+  }
+
   void _submit() async {
     if (_formKey.currentState!.validate()) {
+      handleLoading(true);
       const url =
           'https://tioadxz0c9.execute-api.us-east-1.amazonaws.com/dev/signin';
       final response = await http.post(
@@ -45,9 +53,11 @@ class _LoginViewState extends State<LoginView> {
         print(userID);
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('userId', userID.toString());
+        handleLoading(false);
 
         Navigator.of(context).pushNamed('/');
       } else {
+        handleLoading(false);
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text('Failed login..')));
       }
@@ -120,20 +130,22 @@ class _LoginViewState extends State<LoginView> {
                   const SizedBox(
                     height: 16.0,
                   ),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
-                      onPressed: () {
-                        _submit();
-                      },
-                      child: const Text('Submit'),
-                    ),
-                  )
+                  isLoading
+                      ? const CircularProgressIndicator()
+                      : SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                            ),
+                            onPressed: () {
+                              _submit();
+                            },
+                            child: const Text('Submit'),
+                          ),
+                        )
                 ],
               ),
             ),

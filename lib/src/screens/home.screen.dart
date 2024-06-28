@@ -1,18 +1,15 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'allergy_item.dart';
 import 'show_picture.dart';
 
 class Home extends StatefulWidget {
   const Home({
     Key? key,
     required this.cameras,
-    this.items = const [AllergyItem(5), AllergyItem(2), AllergyItem(3)],
   }) : super(key: key);
 
   static const routeName = '/';
 
-  final List<AllergyItem> items;
   final List<CameraDescription> cameras;
 
   @override
@@ -30,7 +27,7 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> _initializeCamera() async {
-    _controller = CameraController(widget.cameras[0], ResolutionPreset.high);
+    _controller = CameraController(widget.cameras[0], ResolutionPreset.low);
     _initializeControllerFuture = _controller.initialize();
     setState(() {}); // Rebuild after initializing the camera
   }
@@ -51,7 +48,7 @@ class _HomeState extends State<Home> {
         actions: [
           IconButton(
               onPressed: () {
-                Navigator.of(context).pushNamed('/login');
+                Navigator.of(context).pushNamed('/profile');
               },
               icon: const Icon(Icons.account_circle, size: 40.0))
         ],
