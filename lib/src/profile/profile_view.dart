@@ -1,9 +1,5 @@
 import 'package:allergy_finder/src/profile/profile_service.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
-
-import 'package:http/http.dart' as http;
 
 class ProfileView extends StatefulWidget {
   static const routeName = '/profile';
@@ -49,8 +45,9 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   void _removeAllergyItem(String data) {
+    final updateItem = _allergyItems.where((item) => item != data).toList();
     setState(() {
-      _allergyItems.removeWhere((item) => item == data);
+      _allergyItems = updateItem;
     });
   }
 

@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:allergy_finder/src/profile/profile_service.dart';
 import 'package:allergy_finder/src/screens/show_picture_service.dart';
 import 'package:flutter/material.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
 
 class ShowPictureView extends StatefulWidget {
   const ShowPictureView({super.key, required this.imagePath});
@@ -14,6 +16,34 @@ class ShowPictureView extends StatefulWidget {
 
 class _ShowPictureViewState extends State<ShowPictureView> {
   bool isLoading = false;
+  List<String> _items = [];
+  Set<String> _matchedItem = {};
+
+  Future<String> extractText(File imageFile) async {
+    final inputImage = InputImage.fromFile(imageFile);
+    final textRecognizer = GoogleMlKit.vision.textRecognizer();
+    final RecognizedText visionText =
+        await textRecognizer.processImage(inputImage);
+    textRecognizer.close();
+    return visionText.text;
+  }
+
+  compareText(String extractedText, List<String> items) async {
+    List<String> extractedWords =
+        extractedText.toLowerCase().split(RegExp(r'\s+'));
+    Set<String> matchedItem = {};
+    for (String item in items) {
+      if (extractedWords.contains(item.toLowerCase())) {
+        matchedItem.add(item);
+      }
+    }
+
+    setState(() {
+      _matchedItem = matchedItem;
+    });
+
+    return matchedItem;
+  }
 
   void uploadPicture() async {
     handleLoading(true);
@@ -41,7 +71,6 @@ class _ShowPictureViewState extends State<ShowPictureView> {
         actions: [
           IconButton(
               onPressed: () {
-                print('on profile icon click');
                 Navigator.of(context).pushNamed('/profile');
               },
               icon: const Icon(Icons.account_circle, size: 40.0))
@@ -67,9 +96,20 @@ class _ShowPictureViewState extends State<ShowPictureView> {
                           borderRadius: BorderRadius.circular(5.0),
                         ),
                       ),
-                      onPressed: () {
-                        // allergyListBottomSheet(context);
-                        uploadPicture();
+                      onPressed: () async {
+                        // uploadPicture();
+                        handleLoading(true);
+
+                        final _image = File(widget.imagePath);
+                        final _extractedText = await extractText(_image);
+                        final profileData = await fetchUser();
+                        _items.clear();
+                        setState(() {
+                          _items.addAll(profileData.allergyList);
+                        });
+                        final response = compareText(_extractedText, _items);
+                        handleLoading(false);
+                        allergyListBottomSheet(context);
                       },
                       child: const Row(
                         children: [
@@ -113,11 +153,28 @@ class _ShowPictureViewState extends State<ShowPictureView> {
               child: Column(
                 children: <Widget>[
                   _buildHeader(),
+                  if (_matchedItem.isNotEmpty)
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Center(
+                          child: Text('Allergy Item found in this product')),
+                    ),
                   Expanded(
                     child: ListView(
                       controller: scrollController,
                       shrinkWrap: true,
-                      children: _buildDynamicIngredientList(),
+                      children: _matchedItem.isNotEmpty
+                          ? _matchedItem
+                              .map((item) => _buildFoodIngredientBox(item,
+                                  isAllergyItem: true))
+                              .toList()
+                          : [
+                              const Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Center(
+                                    child: Text('No Allergy Content Found')),
+                              )
+                            ],
                     ),
                   ),
                   _buildFooter(context),
@@ -138,31 +195,6 @@ class _ShowPictureViewState extends State<ShowPictureView> {
         style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
       ),
     );
-  }
-
-  List<Widget> _buildDynamicIngredientList() {
-    final ingredients = [
-      {'name': 'Tomato', 'isAllergyItem': false},
-      {'name': 'Peanut', 'isAllergyItem': true},
-      {'name': 'Milk', 'isAllergyItem': true},
-      {'name': 'Bread', 'isAllergyItem': false},
-      {'name': 'Cheese', 'isAllergyItem': false},
-      {'name': 'Tomato', 'isAllergyItem': false},
-      {'name': 'Peanut', 'isAllergyItem': true},
-      {'name': 'Milk', 'isAllergyItem': true},
-      {'name': 'Bread', 'isAllergyItem': false},
-      {'name': 'Cheese', 'isAllergyItem': false},
-      {'name': 'Cheese', 'isAllergyItem': false},
-      {'name': 'Cheese', 'isAllergyItem': false},
-      {'name': 'Cheese', 'isAllergyItem': true},
-    ];
-
-    return ingredients.map((ingredient) {
-      return _buildFoodIngredientBox(
-        ingredient['name'] as String,
-        isAllergyItem: ingredient['isAllergyItem'] as bool,
-      );
-    }).toList();
   }
 
   Widget _buildFoodIngredientBox(String name, {bool isAllergyItem = false}) {
